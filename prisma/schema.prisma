@@ -1,0 +1,100 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum paymentType {
+  COD
+  Online
+}
+
+model User {
+  id        String     @id @default(uuid())
+  name      String
+  email     String     @unique
+  password  String
+  cartItems CartItem[] // Relation
+  orders    Order[]
+  addresses Address[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
+  quantity  Int
+
+  user      User     @relation(fields: [userId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@unique([userId, productId]) // Prevents duplicate product entries in cart
+}
+
+model Address {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  firstName String
+  lastName  String
+  email     String
+  street    String
+  city      String
+  state     String
+  zipcode   Int
+  country   String
+  phone     String
+  orders    Order[]
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  description String[] // Use PostgreSQL native array for storing string descriptions
+  price       Float
+  offerPrice  Float
+  images       String[] // Array of image URLs
+  category    String
+  inStock     Boolean  @default(true)
+  orderItems  OrderItem[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  cartItems   CartItem[] 
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id])
+  addressId   String
+  address     Address     @relation(fields: [addressId], references: [id])
+  items       OrderItem[]
+  amount      Float
+  status      String      @default("Order Placed")
+  paymentType paymentType
+  isPaid      Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  orderId   String
+  productId String
+  quantity  Int
+
+  order     Order    @relation(fields: [orderId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+}
