@@ -1,0 +1,54 @@
+name: Deploy Node Application
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker Image
+        run: docker build -t b0bwen/next-greencart-server .
+
+      - name: Publish Image to Docker Hub
+        run: docker push b0bwen/next-greencart-server:latest
+
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    steps:
+      - name: Pull image from Docker Hub
+        run: docker pull b0bwen/next-greencart-server:latest
+
+      - name: Delete old container
+        run: docker rm -f next-greencart-server-container || true
+
+      - name: Create .env file
+        run: |
+          cat <<EOF > .env
+          DATABASE_URL=${{ secrets.DATABASE_URL }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+
+          SELLER_EMAIL=${{ secrets.SELLER_EMAIL }}
+          SELLER_PASSWORD=${{ secrets.SELLER_PASSWORD }}
+
+          CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
+
+          STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+          STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          EOF
+
+      - name: Run Docker Container with .env
+        run: |
+          docker run -d --env-file .env -p 4000:4000 --name next-greencart-server-container b0bwen/next-greencart-server

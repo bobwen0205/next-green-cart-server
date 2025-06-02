@@ -35,7 +35,7 @@ app.use("/api/cart", cartRouter);
 app.use("/api/product", productRouter);
 app.use("/api/order", orderRouter);
 
-const port = Number(process.env.PORT) || 5000;
+const port = Number(process.env.PORT) || 4000;
 app.listen(port, "0.0.0.0", () => {
   console.log(`Server running on port ${port}`);
 });
