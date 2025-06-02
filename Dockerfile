@@ -17,6 +17,8 @@ COPY . .
 ARG DATABASE_URL
 ENV DATABASE_URL=$DATABASE_URL
 
+RUN echo "DATABASE_URL=$DATABASE_URL" > .env
+
 # Generate Prisma client (if applicable)
 RUN npm run prisma:generate
 
