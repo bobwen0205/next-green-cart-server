@@ -52,3 +52,7 @@ jobs:
       - name: Run Docker Container with .env
         run: |
           docker run -d --env-file .env -p 4000:4000 --name next-greencart-server-container b0bwen/next-greencart-server
+
+      - name: Run Prisma Migrations
+        run: |
+          docker exec next-greencart-server-container npx prisma migrate deploy

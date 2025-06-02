@@ -1,5 +1,5 @@
 # Use Node.js LTS base image
-FROM node:alpine3.18
+FROM node:18
 
 # Set working directory
 WORKDIR /app
@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Generate Prisma client (if applicable)
-RUN npx prisma generate
+RUN npm run prisma:generate
 
 # Build the TypeScript code
 RUN npm run build
