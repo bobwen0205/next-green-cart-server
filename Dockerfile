@@ -13,6 +13,10 @@ RUN npm install
 # Copy the rest of the project files
 COPY . .
 
+# Ensure DATABASE_URL is set before running generate (if needed)
+ARG DATABASE_URL
+ENV DATABASE_URL=$DATABASE_URL
+
 # Generate Prisma client (if applicable)
 RUN npm run prisma:generate
 
