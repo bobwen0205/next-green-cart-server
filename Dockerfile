@@ -20,7 +20,7 @@ ENV DATABASE_URL=$DATABASE_URL
 RUN echo "DATABASE_URL=$DATABASE_URL" > .env
 
 # Generate Prisma client (if applicable)
-RUN npm run prisma:generate
+RUN prisma generate
 
 # Build the TypeScript code
 RUN npm run build
